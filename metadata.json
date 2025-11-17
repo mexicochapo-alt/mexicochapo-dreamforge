@@ -1,0 +1,7 @@
+{
+  "name": "DreamForge ",
+  "description": "A premium AI-powered creative suite to generate and edit images, generate videos, and chat with an advanced AI assistant. Powered by Google Gemini.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
