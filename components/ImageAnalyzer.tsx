@@ -1,7 +1,6 @@
-
 import React, { useState, useRef } from 'react';
 import { analyzeImage } from '../services/geminiService';
-import { Loader2, Upload, Send, Image as ImageIcon } from 'lucide-react';
+import { Loader2, Upload, Send, Image as ImageIcon, ScanSearch, Bot } from 'lucide-react';
 import { fileToBase64 } from '../utils/fileUtils';
 
 export const ImageAnalyzer: React.FC = () => {
@@ -15,7 +14,7 @@ export const ImageAnalyzer: React.FC = () => {
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            if (file.size > 4 * 1024 * 1024) { // 4MB limit
+            if (file.size > 4 * 1024 * 1024) { 
                 setError('File size must be less than 4MB.');
                 return;
             }
@@ -27,11 +26,11 @@ export const ImageAnalyzer: React.FC = () => {
     
     const handleAnalyze = async () => {
         if (!prompt.trim()) {
-            setError('Please enter a question or instruction.');
+            setError('Please enter a question.');
             return;
         }
         if (!image) {
-            setError('Please upload an image first.');
+            setError('Please upload an image.');
             return;
         }
 
@@ -52,68 +51,106 @@ export const ImageAnalyzer: React.FC = () => {
     };
     
     return (
-        <div className="h-full flex flex-col md:flex-row gap-8 pt-16 md:pt-0">
-            <div className="w-full md:w-2/5 flex flex-col space-y-6">
-                <h1 className="text-3xl font-bold text-white font-orbitron">Image Analyzer</h1>
-                <p className="text-gray-400">Upload an image and ask Gemini anything about it.</p>
-
-                <div className="flex flex-col space-y-4">
-                    <input
-                        type="file"
-                        accept="image/png, image/jpeg, image/webp"
-                        ref={fileInputRef}
-                        onChange={handleFileChange}
-                        className="hidden"
-                    />
-                    <button
-                        onClick={() => fileInputRef.current?.click()}
-                        className="w-full flex items-center justify-center gap-2 bg-gray-700/50 border-2 border-dashed border-gray-600 text-gray-300 py-6 px-4 rounded-lg hover:bg-gray-700/80 hover:border-gray-500 transition-colors"
-                    >
-                        <Upload size={20} />
-                        <span>{image ? 'Change Image' : 'Upload Image'}</span>
-                    </button>
-                    {image && <p className="text-xs text-center text-gray-400 truncate">Selected: {image.file.name}</p>}
+        <div className="h-full flex flex-col md:flex-row gap-8 pt-20 md:pt-4 p-4 max-w-7xl mx-auto">
+            {/* Left: Upload Column */}
+            <div className="w-full md:w-1/3 flex flex-col gap-6">
+                 <div>
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white font-orbitron">Visual Cortex</h1>
+                    <p className="text-gray-500 dark:text-gray-400">Gemini Vision 2.5 Analysis.</p>
                 </div>
-                
-                <div className="flex-1 flex flex-col">
-                    <div className="bg-gray-900/50 rounded-lg border border-dashed border-gray-700 flex items-center justify-center p-2 flex-1">
+
+                <div className="flex-1 bg-white dark:bg-[#1a1a20] rounded-2xl border border-gray-200 dark:border-white/5 shadow-lg overflow-hidden flex flex-col">
+                    <div className="flex-1 relative group">
                         {image ? (
-                             <img src={image.url} alt="To be analyzed" className="max-h-full max-w-full object-contain rounded-md" />
+                            <>
+                                <img src={image.url} alt="Analysis Target" className="w-full h-full object-contain bg-black/5 dark:bg-black/40" />
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <button 
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="px-4 py-2 bg-white text-black rounded-full text-sm font-bold hover:scale-105 transition-transform"
+                                    >
+                                        Change Image
+                                    </button>
+                                </div>
+                            </>
                         ) : (
-                            <div className="text-center text-gray-500">
-                                 <ImageIcon size={64} className="mx-auto" />
-                                 <p className="mt-2">Upload an image to start</p>
-                            </div>
+                             <button 
+                                onClick={() => fileInputRef.current?.click()}
+                                className="w-full h-full flex flex-col items-center justify-center text-gray-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition-all"
+                            >
+                                <Upload size={48} className="mb-4" />
+                                <span className="font-bold">Upload Image</span>
+                                <span className="text-xs opacity-70 mt-1">PNG, JPEG (Max 4MB)</span>
+                            </button>
                         )}
+                        <input
+                            type="file"
+                            accept="image/png, image/jpeg, image/webp"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            className="hidden"
+                        />
                     </div>
                 </div>
-
             </div>
 
-            <div className="flex-1 flex flex-col">
-                <div className="flex-1 bg-gray-900/50 rounded-lg border border-gray-700/50 p-4 overflow-y-auto mb-4">
-                    {isLoading && <div className="flex items-center justify-center h-full"><Loader2 size={32} className="animate-spin text-indigo-500" /></div>}
-                    {!isLoading && !analysis && <div className="flex items-center justify-center h-full text-gray-500">Analysis will appear here.</div>}
-                    {analysis && <p className="whitespace-pre-wrap">{analysis}</p>}
+            {/* Right: Interaction Column */}
+            <div className="flex-1 flex flex-col gap-4 h-[600px] md:h-auto">
+                <div className="flex-1 bg-gray-50 dark:bg-[#0f0f12] rounded-2xl border border-gray-200 dark:border-white/5 p-6 overflow-y-auto relative scrollbar-thin">
+                    {!analysis && !isLoading && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 opacity-50 pointer-events-none">
+                            <ScanSearch size={64} strokeWidth={1} />
+                            <p className="mt-4 font-orbitron tracking-widest">AWAITING INPUT</p>
+                        </div>
+                    )}
+                    
+                    {analysis && (
+                        <div className="flex gap-4 animate-fade-in-up">
+                             <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/30">
+                                <Bot size={20} className="text-white" />
+                            </div>
+                            <div className="bg-white dark:bg-[#1a1a20] p-6 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 dark:border-white/5 text-gray-800 dark:text-gray-200 leading-relaxed">
+                                <p className="whitespace-pre-wrap">{analysis}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {isLoading && (
+                         <div className="flex gap-4">
+                            <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center shrink-0">
+                                <Bot size={20} className="text-white" />
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-500 pt-2">
+                                <span className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce"></span>
+                                <span className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce delay-75"></span>
+                                <span className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce delay-150"></span>
+                            </div>
+                        </div>
+                    )}
                 </div>
-                <div className="flex items-center space-x-2">
-                    <input
-                        type="text"
-                        value={prompt}
-                        onChange={(e) => setPrompt(e.target.value)}
-                        placeholder="e.g., What is in this image? Describe it in detail."
-                        className="flex-1 p-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                        disabled={!image}
-                    />
-                    <button
-                        onClick={handleAnalyze}
-                        disabled={isLoading || !image || !prompt}
-                        className="p-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                        <Send size={20} />
-                    </button>
+
+                <div className="relative">
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-xl opacity-20 blur"></div>
+                    <div className="relative bg-white dark:bg-[#1a1a20] p-2 rounded-xl flex items-center gap-2 shadow-lg">
+                        <input
+                            type="text"
+                            value={prompt}
+                            onChange={(e) => setPrompt(e.target.value)}
+                            placeholder="Ask about the image..."
+                            className="flex-1 bg-transparent border-none focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400 px-2"
+                            disabled={!image}
+                            onKeyPress={(e) => e.key === 'Enter' && handleAnalyze()}
+                        />
+                        <button
+                            onClick={handleAnalyze}
+                            disabled={isLoading || !image || !prompt}
+                            className="p-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md"
+                        >
+                            <Send size={20} />
+                        </button>
+                    </div>
                 </div>
-                 {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
+                {error && <p className="text-red-500 text-sm text-center">{error}</p>}
             </div>
         </div>
     );

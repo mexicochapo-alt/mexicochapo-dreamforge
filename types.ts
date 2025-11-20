@@ -1,3 +1,5 @@
+
+import React from 'react';
 import { PageKey } from "./constants";
 
 export interface Page {
@@ -7,27 +9,71 @@ export interface Page {
   component: React.FC;
 }
 
-export type AspectRatio = "1:1" | "16:9" | "9:16" | "4:3" | "3:4";
-
 export interface ChatMessage {
+  id: string;
   role: 'user' | 'model';
+  type: 'text' | 'video' | 'image' | 'api_key_prompt';
   text: string;
+  timestamp: Date;
+  
+  // Moderation
+  isFlagged?: boolean;
+  
+  // Video-specific properties
+  videoUrl?: string;
+  isLoadingVideo?: boolean;
+  videoLoadingMessage?: string;
+
+  // Image-specific properties
+  imageUrl?: string;
+  isLoadingImage?: boolean;
+}
+
+export interface ChatSession {
+    id: string;
+    timestamp: number;
+    title: string;
+    messages: ChatMessage[];
 }
 
 export interface LanguageChatMessage {
+  id: string;
   role: 'user' | 'model';
   text: string;
+  timestamp?: number;
   language?: string;
+  ipa?: string;
+  phonetic?: string;
+  showIpa?: boolean;
+  isFetchingIpa?: boolean;
+  translation?: string;
+  showTranslation?: boolean;
+  isFetchingTranslation?: boolean;
+  audioData?: string;
+  isFetchingAudio?: boolean;
 }
 
-// FIX: Moved AIStudio interface and global window declaration here
-// to serve as a single source of truth and prevent type conflicts.
-export interface AIStudio {
-    hasSelectedApiKey: () => Promise<boolean>;
-    openSelectKey: () => Promise<void>;
+export interface LessonSession {
+    id: string;
+    timestamp: number;
+    language: { code: string; name: string; flag: string };
+    topic: string;
+    messages: LanguageChatMessage[];
+}
+
+export interface ImageHistoryItem {
+    id: string;
+    prompt: string;
+    base64Image: string;
+    timestamp: number;
 }
 
 declare global {
+    interface AIStudio {
+        hasSelectedApiKey: () => Promise<boolean>;
+        openSelectKey: () => Promise<void>;
+    }
+
     interface Window {
         aistudio?: AIStudio;
     }

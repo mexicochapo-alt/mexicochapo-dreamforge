@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ImageGenerator } from './components/ImageGenerator';
 import { ImageEditor } from './components/ImageEditor';
@@ -5,10 +6,12 @@ import { VideoGenerator } from './components/VideoGenerator';
 import { Chatbot } from './components/Chatbot';
 import { ImageAnalyzer } from './components/ImageAnalyzer';
 import { LanguageTeacher } from './components/LanguageTeacher';
-import { Image as ImageIcon, Video, MessageSquare, Edit, ScanSearch, Languages } from 'lucide-react';
+import { AudioTranscriber } from './components/AudioTranscriber';
+import { TextToSpeech } from './components/TextToSpeech';
+import { Image as ImageIcon, Video, MessageSquare, Edit, ScanSearch, Languages, Mic, Speech } from 'lucide-react';
 import { Page } from './types';
 
-export const PAGE_KEYS = ['image-gen', 'image-edit', 'video-gen', 'chatbot', 'image-analyze', 'language-teacher'] as const;
+export const PAGE_KEYS = ['image-gen', 'image-edit', 'video-gen', 'chatbot', 'image-analyze', 'language-teacher', 'audio-transcribe', 'text-to-speech'] as const;
 export type PageKey = typeof PAGE_KEYS[number];
 
 export const PAGES: Page[] = [
@@ -47,5 +50,17 @@ export const PAGES: Page[] = [
     name: 'Language Teacher',
     icon: <Languages size={20} />,
     component: LanguageTeacher,
+  },
+  {
+    key: 'audio-transcribe',
+    name: 'Audio Transcriber',
+    icon: <Mic size={20} />,
+    component: AudioTranscriber,
+  },
+  {
+    key: 'text-to-speech',
+    name: 'Text to Speech',
+    icon: <Speech size={20} />,
+    component: TextToSpeech,
   },
 ];
